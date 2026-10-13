@@ -238,7 +238,7 @@ class ScenarioRequest(BaseModel):
 class TrainRequest(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
     n_estimators: int = Field(default=200, ge=10, le=1000)
-    contamination: float = Field(default=0.03, gt=0, le=0.5)
+    contamination: float = Field(default=0.04, gt=0, le=0.5)
 
 
 # ---------------------------------------------------------------- esp32

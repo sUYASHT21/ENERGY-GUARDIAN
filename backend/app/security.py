@@ -5,6 +5,9 @@ import base64
 import hashlib
 import hmac
 import secrets
+import threading
+import time
+from collections import defaultdict, deque
 from datetime import timedelta
 
 import jwt
@@ -58,3 +61,30 @@ def verify_device_key(key: str, stored_hash: str) -> bool:
 
 def role_at_least(role: str, required: str) -> bool:
     return ROLE_RANK.get(role, -1) >= ROLE_RANK[required]
+
+
+class LoginRateLimiter:
+    """Max ``limit`` failed logins per (ip, username) within ``window`` seconds."""
+
+    def __init__(self, limit: int = 8, window: float = 300):
+        self.limit, self.window = limit, window
+        self._fails: dict[str, deque] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    def _prune(self, key: str, now: float) -> deque:
+        q = self._fails[key]
+        while q and now - q[0] > self.window:
+            q.popleft()
+        return q
+
+    def blocked(self, key: str) -> bool:
+        with self._lock:
+            return len(self._prune(key, time.monotonic())) >= self.limit
+
+    def fail(self, key: str) -> None:
+        with self._lock:
+            self._prune(key, time.monotonic()).append(time.monotonic())
+
+    def reset(self, key: str) -> None:
+        with self._lock:
+            self._fails.pop(key, None)

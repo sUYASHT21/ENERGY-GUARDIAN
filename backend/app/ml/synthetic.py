@@ -51,7 +51,11 @@ class Dataset:
 
 
 def generate(n_appliances: int = 40, steps: int = 400, anomaly_rate: float = 0.03, seed: int = 42) -> Dataset:
-    """Generate per-appliance sequences of readings with injected, labelled anomalies."""
+    """Generate per-appliance sequences of readings with injected, labelled anomaly *episodes*.
+
+    ``anomaly_rate`` is the per-step probability that an episode starts. Spikes last one reading;
+    other faults persist for 1-6 consecutive readings, as real faults do.
+    """
     rng = np.random.default_rng(seed)
     types = [t for t in PROFILES if t != "other"]
     X, y, kinds = [], [], []
@@ -63,14 +67,20 @@ def generate(n_appliances: int = 40, steps: int = 400, anomaly_rate: float = 0.0
         on = bool(rng.random() < 0.6)
         prev_power: float | None = None
         prev_ratio: float | None = None
+        episode_kind: str | None = None
+        episode_left = 0
         for _ in range(steps):
-            if rng.random() < 0.03:  # occasional switching
-                on = not on
-            if rng.random() < anomaly_rate:
-                kind = ANOMALY_KINDS[int(rng.integers(len(ANOMALY_KINDS)))]
+            if episode_left == 0 and rng.random() < anomaly_rate:
+                episode_kind = ANOMALY_KINDS[int(rng.integers(len(ANOMALY_KINDS)))]
+                episode_left = 1 if episode_kind == "spike" else int(rng.integers(1, 7))
+            if episode_left > 0:
+                kind = episode_kind
                 p, v, i, relay = anomalous_reading(rng, kind, rated, prev_power)
                 label = 1
+                episode_left -= 1
             else:
+                if rng.random() < 0.03:  # occasional normal switching
+                    on = not on
                 kind = "normal"
                 p, v, i = normal_reading(rng, a_type, rated, on, prev_ratio)
                 relay = on
@@ -83,5 +93,5 @@ def generate(n_appliances: int = 40, steps: int = 400, anomaly_rate: float = 0.0
             y.append(label)
             kinds.append(kind)
             prev_power = p
-            prev_ratio = p / rated if on else None
+            prev_ratio = p / rated if (on and label == 0) else None
     return Dataset(np.vstack(X), np.array(y, dtype=int), np.array(kinds), list(FEATURE_NAMES))

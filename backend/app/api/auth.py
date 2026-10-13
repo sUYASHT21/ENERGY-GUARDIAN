@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import threading
-import time
-from collections import defaultdict, deque
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
@@ -17,39 +13,12 @@ from .deps import CurrentUser, admin, current_user, get_ctx, get_db
 router = APIRouter(tags=["auth"])
 
 
-class LoginRateLimiter:
-    """Max ``limit`` failed logins per (ip, username) within ``window`` seconds."""
-
-    def __init__(self, limit: int = 8, window: float = 300):
-        self.limit, self.window = limit, window
-        self._fails: dict[str, deque] = defaultdict(deque)
-        self._lock = threading.Lock()
-
-    def _prune(self, key: str, now: float) -> deque:
-        q = self._fails[key]
-        while q and now - q[0] > self.window:
-            q.popleft()
-        return q
-
-    def blocked(self, key: str) -> bool:
-        with self._lock:
-            return len(self._prune(key, time.monotonic())) >= self.limit
-
-    def fail(self, key: str) -> None:
-        with self._lock:
-            self._prune(key, time.monotonic()).append(time.monotonic())
-
-    def reset(self, key: str) -> None:
-        with self._lock:
-            self._fails.pop(key, None)
-
-
-limiter = LoginRateLimiter()
 
 
 @router.post("/auth/login", response_model=TokenResponse)
 def login(body: LoginRequest, request: Request, ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)):
     key = f"{request.client.host if request.client else '?'}:{body.username.lower()}"
+    limiter = ctx.login_limiter
     if limiter.blocked(key):
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "too many failed login attempts; try later")
     user = db.query(User).filter(User.username == body.username).one_or_none()

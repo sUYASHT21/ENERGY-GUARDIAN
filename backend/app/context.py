@@ -14,6 +14,7 @@ from .clock import Clock
 from .config import Settings
 from .database import Database
 from .ml.model import AnomalyService
+from .security import LoginRateLimiter
 
 if TYPE_CHECKING:
     from .simulation.engine import Simulator
@@ -83,6 +84,7 @@ class AppContext:
     decisions: dict[int, dict] = field(default_factory=dict)
     simulator: Simulator | None = None
     started_at: Any = None
+    login_limiter: LoginRateLimiter = field(default_factory=LoginRateLimiter)
 
     def __post_init__(self):
         bus = self.bus

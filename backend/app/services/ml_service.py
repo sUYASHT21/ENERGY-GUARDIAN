@@ -31,7 +31,7 @@ def activate(ctx: AppContext, db: Session, rec: MLModelRecord, actor: str = "sys
 
 
 def train_and_activate(ctx: AppContext, db: Session, *, seed: int = 42, n_estimators: int = 200,
-                       contamination: float = 0.03, actor: str = "system") -> MLModelRecord:
+                       contamination: float = 0.04, actor: str = "system") -> MLModelRecord:
     existing = db.query(MLModelRecord).count()
     version = f"if-v{existing + 1}-s{seed}"
     while db.query(MLModelRecord).filter(MLModelRecord.version == version).first():

@@ -111,11 +111,20 @@ class TrainResult:
     n_test: int
 
 
-def train(model_dir: Path, seed: int = 42, n_estimators: int = 200, contamination: float = 0.03,
+TRAIN_EPISODE_RATE = 0.01
+TEST_EPISODE_RATE = 0.01
+
+
+def train(model_dir: Path, seed: int = 42, n_estimators: int = 200, contamination: float = 0.04,
           version: str | None = None) -> TrainResult:
-    """Train on a synthetic training set and evaluate on an independently-seeded test set."""
-    train_ds = synthetic.generate(n_appliances=40, steps=400, anomaly_rate=0.02, seed=seed)
-    test_ds = synthetic.generate(n_appliances=20, steps=400, anomaly_rate=0.05, seed=seed + 1000)
+    """Unsupervised training on synthetic operation data that contains a small, *unlabelled* share
+    of anomaly episodes (as real logs would), then evaluation on an independently-seeded synthetic
+    test set with labelled episodes.
+
+    Note: training on normal-only data was evaluated and rejected — Isolation Forest cannot split on
+    features that are constant in normal data (e.g. relay mismatch), so recall collapsed."""
+    train_ds = synthetic.generate(n_appliances=40, steps=400, anomaly_rate=TRAIN_EPISODE_RATE, seed=seed)
+    test_ds = synthetic.generate(n_appliances=20, steps=400, anomaly_rate=TEST_EPISODE_RATE, seed=seed + 1000)
     model = IsolationForest(n_estimators=n_estimators, contamination=contamination, random_state=seed)
     model.fit(train_ds.X)
     metrics = evaluate_model(model, test_ds)
@@ -124,7 +133,8 @@ def train(model_dir: Path, seed: int = 42, n_estimators: int = 200, contaminatio
     path = model_dir / f"{version}.joblib"
     joblib.dump(model, path)
     params = {"n_estimators": n_estimators, "contamination": contamination, "seed": seed,
-              "features": FEATURE_NAMES, "train_anomaly_rate": 0.02, "test_anomaly_rate": 0.05}
+              "features": FEATURE_NAMES, "train_episode_start_rate": TRAIN_EPISODE_RATE,
+              "test_episode_start_rate": TEST_EPISODE_RATE, "train_anomaly_share": round(float(train_ds.y.mean()), 4)}
     (model_dir / f"{version}.json").write_text(json.dumps({"version": version, "params": params,
                                                           "metrics": metrics}, indent=2))
     log.info("Trained %s: precision=%.3f recall=%.3f f1=%.3f auc=%.3f (synthetic test set)",

@@ -16,9 +16,9 @@ export default function Rooms() {
   const [creating, setCreating] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">Rooms & appliances</h1>
+        <h1 className="display text-[34px] text-ink sm:text-[44px]">Rooms <em>&amp; appliances</em></h1>
         {can("operator") && <Button variant="primary" onClick={() => setCreating(true)}><Plus className="size-4" />Add room</Button>}
       </div>
       <ErrorBanner error={rooms.error} onRetry={rooms.reload} />
@@ -26,13 +26,13 @@ export default function Rooms() {
         <Card bodyClass="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
-              <thead className="bg-surface-2 text-left text-xs text-ink-2">
+              <thead className="text-left text-[13px] text-tag">
                 <tr><th className="px-4 py-2">Room</th><th>Type</th><th>Building</th><th>Occupancy</th><th>Min. vacancy</th><th>Automation</th><th>Updated</th></tr>
               </thead>
               <tbody>
                 {rooms.data.map((r) => (
                   <tr key={r.id} className="border-t border-line hover:bg-surface-2">
-                    <td className="px-4 py-2.5"><Link className="font-medium text-accent-ink hover:underline" to={`/rooms/${r.id}`}>{r.name}</Link></td>
+                    <td className="px-4 py-2.5"><Link className="font-medium text-ink underline-offset-4 hover:underline" to={`/rooms/${r.id}`}>{r.name}</Link></td>
                     <td>{humanize(r.room_type)}</td>
                     <td className="text-ink-2">{r.building || "—"}{r.floor ? ` · floor ${r.floor}` : ""}</td>
                     <td><span className="inline-flex items-center gap-1.5"><StatusPill tone={occupancyTone(r.occupancy_state)} label={humanize(r.occupancy_state)} />{r.occupancy_source && <SourceBadge source={r.occupancy_source} compact />}</span></td>

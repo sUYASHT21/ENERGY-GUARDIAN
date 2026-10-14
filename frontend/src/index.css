@@ -1,96 +1,150 @@
 @import "tailwindcss";
 
-/* Design tokens. Every colour in the UI is a token so dark mode is a token swap.
-   Chart palette = validated reference palette (blue / orange / aqua), see docs/FRONTEND.md. */
+/* Design system: "serif analytics on warm paper" (docs/DESIGN.md) — Source Serif 4 display type
+   at weight 400, Inter UI with half-step weights, 24px soft cards, pill controls, floating product
+   artifacts with a whisper shadow, a peach/sienna editorial accent — extended with a warm tint
+   palette so status and metrics carry colour. Chart palette validated for colour-blind safety. */
 :root {
   color-scheme: light;
-  --bg: #f4f4f1;
-  --surface: #fcfcfb;
-  --surface-2: #f0efec;
-  --border: rgba(11, 11, 11, 0.1);
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #6f6d68;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --accent: #2a78d6;
-  --accent-ink: #1c5cab;
-  --accent-wash: rgba(42, 120, 214, 0.1);
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface-2: #f2f2f3;
+  --fog: #f7f6f2;
+  --border: #ececec;
+  --ink: #17191c;
+  --ink-2: #4e525b;
+  --muted: #777b86;
+  --tag: #979799;
+  --placeholder: #a3a6af;
+  --grid: #ececec;
+  --axis: #d6d6d9;
+  --accent: #17191c;
+  --accent-ink: #17191c;
+  --accent-wash: #f2f2f3;
+  --peach: #fbe1d1;
+  --sienna: #5d2a1a;
+  /* warm editorial tints: surface + same-hue ink */
+  --t-peach: #fbe1d1; --t-peach-ink: #5d2a1a;
+  --t-sky: #dcebf9; --t-sky-ink: #173f63;
+  --t-sage: #dcefe0; --t-sage-ink: #1d4a2a;
+  --t-butter: #fbf0c6; --t-butter-ink: #5a4506;
+  --t-rose: #fbdde2; --t-rose-ink: #6b1f2e;
+  --t-lilac: #e8e3fb; --t-lilac-ink: #3b2e7a;
+  /* chart palette (validated: CVD ΔE ≥ 8.6, contrast ≥ 3:1 on white) */
+  --series-1: #2a6fb0;
+  --series-2: #e0663a;
+  --series-3: #3f9e6d;
+  --line-live: #5d2a1a;
+  --wash-live: #fbe1d1;
+  /* status (always paired with icon + label) */
   --good: #0ca30c;
-  --good-ink: #006300;
+  --good-ink: #1d6a1d;
   --warning: #fab219;
-  --warning-ink: #8a5a00;
+  --warning-ink: #7a5200;
   --serious: #ec835a;
   --critical: #d03b3b;
   --critical-ink: #b42b2b;
   --sim: #6250d6;
-  --sim-wash: rgba(98, 80, 214, 0.1);
+  --sim-wash: #e8e3fb;
+  --shadow-float: 0 0 0 1px rgba(4, 23, 43, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  --shadow-pop: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 8px 40px 0 rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #0d0d0d;
-    --surface: #1a1a19;
-    --surface-2: #232321;
-    --border: rgba(255, 255, 255, 0.1);
-    --ink: #f0efec;
-    --ink-2: #c3c2b7;
-    --muted: #9a988f;
-    --grid: #2c2c2a;
-    --axis: #383835;
-    --accent: #3987e5;
-    --accent-ink: #86b6ef;
-    --accent-wash: rgba(57, 135, 229, 0.14);
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-    --good-ink: #0ca30c;
+    --bg: #12110f;
+    --surface: #1b1916;
+    --surface-2: #24221e;
+    --fog: #171613;
+    --border: #2e2b27;
+    --ink: #f3f1ec;
+    --ink-2: #cfcac0;
+    --muted: #a19c92;
+    --tag: #8f8a80;
+    --placeholder: #7b776f;
+    --grid: #2b2925;
+    --axis: #3a3732;
+    --accent: #f3f1ec;
+    --accent-ink: #f3f1ec;
+    --accent-wash: #24221e;
+    --peach: #3d271c;
+    --sienna: #f6c9ae;
+    --t-peach: #3d271c; --t-peach-ink: #f6c9ae;
+    --t-sky: #1b2c3d; --t-sky-ink: #b5d5f5;
+    --t-sage: #1b3022; --t-sage-ink: #b4dfc0;
+    --t-butter: #352d12; --t-butter-ink: #f2dc94;
+    --t-rose: #3a1d24; --t-rose-ink: #f5bcc7;
+    --t-lilac: #27223f; --t-lilac-ink: #cfc6f7;
+    --series-1: #3d85d8;
+    --series-2: #dd6233;
+    --series-3: #2f9e69;
+    --line-live: #f0a27a;
+    --wash-live: #f0a27a;
+    --good-ink: #4cc04c;
     --warning-ink: #fab219;
-    --critical-ink: #e66767;
-    --sim: #9085e9;
-    --sim-wash: rgba(144, 133, 233, 0.14);
+    --critical-ink: #ee7b7b;
+    --sim: #a99ff0;
+    --sim-wash: #27223f;
+    --shadow-float: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+    --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 40px 0 rgba(0, 0, 0, 0.55);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0d0d0d;
-  --surface: #1a1a19;
-  --surface-2: #232321;
-  --border: rgba(255, 255, 255, 0.1);
-  --ink: #f0efec;
-  --ink-2: #c3c2b7;
-  --muted: #9a988f;
-  --grid: #2c2c2a;
-  --axis: #383835;
-  --accent: #3987e5;
-  --accent-ink: #86b6ef;
-  --accent-wash: rgba(57, 135, 229, 0.14);
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --good-ink: #0ca30c;
+  --bg: #12110f;
+  --surface: #1b1916;
+  --surface-2: #24221e;
+  --fog: #171613;
+  --border: #2e2b27;
+  --ink: #f3f1ec;
+  --ink-2: #cfcac0;
+  --muted: #a19c92;
+  --tag: #8f8a80;
+  --placeholder: #7b776f;
+  --grid: #2b2925;
+  --axis: #3a3732;
+  --accent: #f3f1ec;
+  --accent-ink: #f3f1ec;
+  --accent-wash: #24221e;
+  --peach: #3d271c;
+  --sienna: #f6c9ae;
+  --t-peach: #3d271c; --t-peach-ink: #f6c9ae;
+  --t-sky: #1b2c3d; --t-sky-ink: #b5d5f5;
+  --t-sage: #1b3022; --t-sage-ink: #b4dfc0;
+  --t-butter: #352d12; --t-butter-ink: #f2dc94;
+  --t-rose: #3a1d24; --t-rose-ink: #f5bcc7;
+  --t-lilac: #27223f; --t-lilac-ink: #cfc6f7;
+  --series-1: #3d85d8;
+  --series-2: #dd6233;
+  --series-3: #2f9e69;
+  --line-live: #f0a27a;
+  --wash-live: #f0a27a;
+  --good-ink: #4cc04c;
   --warning-ink: #fab219;
-  --critical-ink: #e66767;
-  --sim: #9085e9;
-  --sim-wash: rgba(144, 133, 233, 0.14);
+  --critical-ink: #ee7b7b;
+  --sim: #a99ff0;
+  --sim-wash: #27223f;
+  --shadow-float: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+  --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 40px 0 rgba(0, 0, 0, 0.55);
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-fog: var(--fog);
   --color-line: var(--border);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
+  --color-tag: var(--tag);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-wash: var(--accent-wash);
+  --color-peach: var(--peach);
+  --color-sienna: var(--sienna);
   --color-good: var(--good);
   --color-good-ink: var(--good-ink);
   --color-warning: var(--warning);
@@ -100,7 +154,10 @@
   --color-critical-ink: var(--critical-ink);
   --color-sim: var(--sim);
   --color-sim-wash: var(--sim-wash);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, "Times New Roman", serif;
+  --shadow-float: var(--shadow-float);
+  --shadow-pop: var(--shadow-pop);
 }
 
 html,
@@ -108,14 +165,39 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+::placeholder {
+  color: var(--placeholder);
+}
+
+/* Editorial display type: serif at weight 400, tighter tracking as size grows. */
+.display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+.display em {
+  font-style: italic;
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* Recharts: keep chart chrome recessive and token-driven */
+/* Tint helpers: a soft surface with same-hue ink. */
+.tint-peach { background: var(--t-peach); color: var(--t-peach-ink); }
+.tint-sky { background: var(--t-sky); color: var(--t-sky-ink); }
+.tint-sage { background: var(--t-sage); color: var(--t-sage-ink); }
+.tint-butter { background: var(--t-butter); color: var(--t-butter-ink); }
+.tint-rose { background: var(--t-rose); color: var(--t-rose-ink); }
+.tint-lilac { background: var(--t-lilac); color: var(--t-lilac-ink); }
+
+/* Recharts: recessive, token-driven chrome */
 .recharts-cartesian-grid line {
   stroke: var(--grid);
 }

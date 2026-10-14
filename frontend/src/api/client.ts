@@ -1,4 +1,7 @@
-export const API_BASE = "/api/v1";
+/* Same-origin by default (Vite dev proxy / nginx). For split hosting (e.g. frontend on Vercel,
+   backend on Render) set VITE_API_URL=https://your-backend.example.com at build time. */
+export const API_ORIGIN = ((import.meta.env.VITE_API_URL as string | undefined) ?? "").replace(/\/+$/, "");
+export const API_BASE = `${API_ORIGIN}/api/v1`;
 const TOKEN_KEY = "seg_token";
 
 export class ApiError extends Error {

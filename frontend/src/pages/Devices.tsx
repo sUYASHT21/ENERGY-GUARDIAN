@@ -29,11 +29,11 @@ export default function Devices() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">Devices</h1>
-          <p className="text-sm text-ink-2">ESP32 controllers, emulators and simulated nodes. See docs/HARDWARE.md for the HTTP protocol.</p>
+          <h1 className="display text-[34px] text-ink sm:text-[44px]">Devices <em>&amp; controllers</em></h1>
+          <p className="mt-2 text-[16px] text-muted">ESP32 controllers, emulators and simulated nodes. See docs/HARDWARE.md for the HTTP protocol.</p>
         </div>
         {can("admin") && <Button variant="primary" onClick={() => setCreating(true)}><Plus className="size-4" />Register device</Button>}
       </div>
@@ -71,7 +71,7 @@ export default function Devices() {
       {creating && <DeviceForm rooms={rooms.data ?? []} onClose={() => setCreating(false)} onCreated={(uid, key) => { setCreating(false); setIssuedKey({ uid, key }); devices.reload(); }} />}
       {issuedKey && (
         <Modal title="Device API key" onClose={() => setIssuedKey(null)}>
-          <p className="text-sm text-ink-2">This key is shown <b>once</b>. Put it in the firmware's <code>config.h</code> (or pass it to the emulator). Only a hash is stored on the server.</p>
+          <p className="mt-2 text-[16px] text-muted">This key is shown <b>once</b>. Put it in the firmware's <code>config.h</code> (or pass it to the emulator). Only a hash is stored on the server.</p>
           <dl className="mt-3 space-y-2 text-sm">
             <div><dt className="text-xs text-muted">X-Device-Id</dt><dd className="font-mono">{issuedKey.uid}</dd></div>
             <div><dt className="text-xs text-muted">X-Device-Key</dt><dd className="break-all rounded bg-surface-2 p-2 font-mono">{issuedKey.key}</dd></div>

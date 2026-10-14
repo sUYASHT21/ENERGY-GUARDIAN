@@ -12,11 +12,11 @@ export default function Commands() {
   const apps = useApi<Appliance[]>("/appliances");
   const name = (id: number) => apps.data?.find((a) => a.id === id)?.name ?? `#${id}`;
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">Command log</h1>
-          <p className="text-sm text-ink-2">Every command — manual or automatic — with its safety-gate result, delivery and acknowledgement.</p>
+          <h1 className="display text-[34px] text-ink sm:text-[44px]">Command <em>log</em></h1>
+          <p className="mt-2 text-[16px] text-muted">Every command — manual or automatic — with its safety-gate result, delivery and acknowledgement.</p>
         </div>
         <select className={cx(inputCls, "w-auto")} value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status filter">
           {STATUSES.map((s) => <option key={s} value={s}>{s || "All statuses"}</option>)}
@@ -27,7 +27,7 @@ export default function Commands() {
         <Card bodyClass="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-sm">
-              <thead className="bg-surface-2 text-left text-xs text-ink-2">
+              <thead className="text-left text-[13px] text-tag">
                 <tr><th className="px-3 py-2">#</th><th>Appliance</th><th>Action</th><th>Status</th><th>Mode</th><th>Origin</th><th>Created</th><th>Sent</th><th>Completed</th><th>Reason / error</th></tr>
               </thead>
               <tbody>

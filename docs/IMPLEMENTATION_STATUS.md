@@ -20,6 +20,7 @@ This file is the resume point for development. Update it at the end of every sta
 | 11 | Frontend tests (vitest) + Playwright E2E | done — 18 unit + 4 E2E passing |
 | 12 | Docker Compose, CI workflow | done — stack built and E2E-verified locally |
 | 13 | Documentation | done |
+| 14 | UI redesign per docs/DESIGN_REFERENCE.md (+ colour), Vercel/Render deployment config | done — deploy itself pending (Vercel blocked from build environment) |
 
 ## How to resume
 
@@ -76,3 +77,7 @@ Key entry points: `backend/app/main.py` (app factory, lifespan, WebSocket),
 - 2026-10-13: stages 0–9 (backend, 101 tests), ML training fixes.
 - 2026-10-14: frontend + tests, Playwright E2E, firmware, emulator, Docker, CI, docs; final run
   104 backend / 18 frontend / 4 E2E passing.
+- 2026-10-14: editorial redesign (Source Serif 4 + Inter, pill controls, floating cards, peach
+  accent, warm tint palette, validated chart colours, warm dark mode); `VITE_API_URL` for split
+  hosting, `CORS_ORIGIN_REGEX`, PORT-aware Dockerfile, `vercel.json`, `render.yaml`,
+  docs/DEPLOYMENT.md. Tests: 104 backend / 18 frontend / 4 E2E passing.

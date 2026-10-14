@@ -39,12 +39,12 @@ export default function ML() {
   const m = s.active_model?.metrics;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold">Anomaly detection model</h1>
-        <p className="text-sm text-ink-2">scikit-learn Isolation Forest on electrical features (power ratio, step change, voltage deviation, power factor, relay/power mismatch), with a transparent rule-based fallback.</p>
+        <h1 className="display text-[34px] text-ink sm:text-[44px]">Anomaly <em>detection</em></h1>
+        <p className="mt-2 text-[16px] text-muted">scikit-learn Isolation Forest on electrical features (power ratio, step change, voltage deviation, power factor, relay/power mismatch), with a transparent rule-based fallback.</p>
       </div>
-      <div className="flex flex-col gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+      <div className="flex flex-col gap-2 rounded-3xl tint-butter p-4 text-sm">
         <p className="flex items-start gap-2"><ShieldAlert className="mt-0.5 size-4 shrink-0 text-warning-ink" aria-hidden /><span><b>Synthetic evaluation.</b> {s.disclaimer}</span></p>
         <p className="pl-6 text-ink-2">{s.safety_note}</p>
       </div>
@@ -66,8 +66,8 @@ export default function ML() {
           {!m ? <Empty>No trained model — rules are in use</Empty> : (
             <>
               <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4 xl:grid-cols-2">
-                {[["Precision", m.precision], ["Recall", m.recall], ["F1", m.f1], ["ROC-AUC", m.roc_auc]].map(([k, v]) => (
-                  <div key={k as string} className="rounded-lg bg-surface-2 p-2"><div className="text-xs text-ink-2">{k}</div><div className="text-lg font-semibold tabular">{(v as number).toFixed(3)}</div></div>
+                {([["Precision", m.precision, "sky"], ["Recall", m.recall, "sage"], ["F1", m.f1, "lilac"], ["ROC-AUC", m.roc_auc, "butter"]] as const).map(([k, v, t]) => (
+                  <div key={k} className={`rounded-2xl p-3 tint-${t}`}><div className="text-xs opacity-80">{k}</div><div className="display text-[24px] leading-tight tabular">{v.toFixed(3)}</div></div>
                 ))}
               </div>
               <h3 className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Confusion matrix</h3>
@@ -83,7 +83,7 @@ export default function ML() {
                 {Object.entries(m.recall_by_anomaly_kind).map(([k, v]) => (
                   <li key={k} className="flex items-center gap-2">
                     <span className="w-36 text-ink-2">{humanize(k)}</span>
-                    <span className="h-2 flex-1 rounded-full bg-accent-wash"><span className="block h-2 rounded-full bg-accent" style={{ width: `${v * 100}%` }} /></span>
+                    <span className="h-2 flex-1 rounded-full bg-[var(--t-sky)]"><span className="block h-2 rounded-full bg-[var(--series-1)]" style={{ width: `${v * 100}%` }} /></span>
                     <span className="w-12 text-right tabular">{(v * 100).toFixed(0)}%</span>
                   </li>
                 ))}

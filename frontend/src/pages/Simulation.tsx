@@ -21,11 +21,11 @@ export default function Simulation() {
   if (!s.enabled) return <Empty>Simulation is disabled on this server (SIMULATION_ENABLED=false).</Empty>;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Simulation</h1>
-          <p className="max-w-3xl text-sm text-ink-2">
+          <h1 className="display text-[34px] text-ink sm:text-[44px]">Simulation <em>lab</em></h1>
+          <p className="mt-2 max-w-3xl text-[16px] text-muted">
             Hardware-free demo. Each simulated controller behaves like an ESP32: it posts telemetry through the same ingestion pipeline and
             fetches/acknowledges commands through the same functions as the HTTP device API. All its data is labelled <b>Simulated</b>.
           </p>
@@ -43,7 +43,7 @@ export default function Simulation() {
       <Card title="Scenario per room" subtitle={`Tick interval ${s.tick_seconds}s. Demo rooms use a 1-minute minimum vacancy so wastage is detected quickly.`}>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {s.rooms?.map((r) => (
-            <div key={r.room_id} className="rounded-lg border border-line p-3">
+            <div key={r.room_id} className="rounded-2xl border border-line p-3">
               <div className="font-medium">{r.room}</div>
               <select disabled={!can("operator")} className={cx(inputCls, "mt-2")} value={r.scenario} aria-label={`Scenario for ${r.room}`}
                 onChange={(e) => call("/simulation/scenario", { room_id: r.room_id, scenario: e.target.value }, `${r.room}: ${humanize(e.target.value)}`)}>

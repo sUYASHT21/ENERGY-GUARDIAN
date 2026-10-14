@@ -10,11 +10,11 @@ export default function Events() {
   const [category, setCategory] = useState("");
   const events = useApi<EventItem[]>(`/events?limit=300${category ? `&category=${category}` : ""}`, { refreshOn: ["event"], throttleMs: 3000 });
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">Event log</h1>
-          <p className="text-sm text-ink-2">Persistent audit trail of system activity, configuration changes and operator actions.</p>
+          <h1 className="display text-[34px] text-ink sm:text-[44px]">Event <em>log</em></h1>
+          <p className="mt-2 text-[16px] text-muted">Persistent audit trail of system activity, configuration changes and operator actions.</p>
         </div>
         <select className={cx(inputCls, "w-auto")} value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category">
           {CATEGORIES.map((c) => <option key={c} value={c}>{c || "All categories"}</option>)}

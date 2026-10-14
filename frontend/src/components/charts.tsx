@@ -11,7 +11,7 @@ const S2 = "var(--series-2)";
 /* Shared tooltip shell: text uses ink tokens; identity comes from the swatch beside it. */
 function TipBox({ title, rows }: { title: string; rows: { color?: string; label: string; value: string }[] }) {
   return (
-    <div className="rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-2xl bg-surface px-3.5 py-2.5 text-xs shadow-pop">
       <div className="mb-1 font-medium text-ink">{title}</div>
       {rows.map((r) => (
         <div key={r.label} className="flex items-center gap-2 text-ink-2">
@@ -51,11 +51,19 @@ function ChartFrame({ height, children, label }: { height: number; children: Rea
 
 const hhmm = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-export function LivePowerChart({ points, height = 220 }: { points: LivePoint[]; height?: number }) {
+const LIVE = "var(--line-live)";
+
+export function LivePowerChart({ points, height = 220, gradientId = "liveWash" }: { points: LivePoint[]; height?: number; gradientId?: string }) {
   const data = points.map((p) => ({ t: new Date(p.ts).getTime(), power: p.power_w, ts: p.ts }));
   return (
     <ChartFrame height={height} label="Total live power over the last minutes">
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" style={{ stopColor: "var(--wash-live)", stopOpacity: 0.75 }} />
+            <stop offset="100%" style={{ stopColor: "var(--wash-live)", stopOpacity: 0.05 }} />
+          </linearGradient>
+        </defs>
         <CartesianGrid vertical={false} />
         <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={(t) => hhmm(new Date(t).toISOString())} minTickGap={40} />
         <YAxis tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(1)} kW` : `${v} W`)} width={56} />
@@ -63,11 +71,11 @@ export function LivePowerChart({ points, height = 220 }: { points: LivePoint[]; 
           cursor={{ strokeWidth: 1 }}
           content={({ active, payload }) =>
             active && payload?.length ? (
-              <TipBox title={new Date(payload[0].payload.t).toLocaleTimeString()} rows={[{ color: S1, label: "Total power", value: formatPower(payload[0].payload.power) }]} />
+              <TipBox title={new Date(payload[0].payload.t).toLocaleTimeString()} rows={[{ color: LIVE, label: "Total power", value: formatPower(payload[0].payload.power) }]} />
             ) : null
           }
         />
-        <Area type="monotone" dataKey="power" stroke={S1} strokeWidth={2} fill={S1} fillOpacity={0.1} isAnimationActive={false} dot={false} activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} />
+        <Area type="monotone" dataKey="power" stroke={LIVE} strokeWidth={2} fill={`url(#${gradientId})`} isAnimationActive={false} dot={false} activeDot={{ r: 4, fill: LIVE, stroke: "var(--surface)", strokeWidth: 2 }} />
       </AreaChart>
     </ChartFrame>
   );

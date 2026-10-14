@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = INSECURE_DEFAULT_PASSWORD
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080"
+    # Optional regex for additional allowed origins, e.g. r"https://.*\.vercel\.app"
+    cors_origin_regex: str | None = None
 
     # --- Hardware safety --------------------------------------------------------
     # Master switch for sending commands to *physical* ESP32 relays. Off by default.

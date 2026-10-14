@@ -33,10 +33,10 @@ export default function Schedules() {
   const remove = async (s: Schedule) => { try { await del(`/schedules/${s.id}`); schedules.reload(); } catch (e) { toast("critical", (e as Error).message); } };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold">Schedules</h1>
-        <p className="text-sm text-ink-2">During a scheduled session (and the grace period before it) automatic shutdown is blocked; only recommendations are raised. Times are in the configured local timezone.</p>
+        <h1 className="display text-[34px] text-ink sm:text-[44px]">Room <em>schedules</em></h1>
+        <p className="mt-2 text-[16px] text-muted">During a scheduled session (and the grace period before it) automatic shutdown is blocked; only recommendations are raised. Times are in the configured local timezone.</p>
       </div>
       {can("operator") && (
         <Card title="Add session">
@@ -47,7 +47,7 @@ export default function Schedules() {
               <span className="text-sm font-medium text-ink-2">Days</span>
               <div className="mt-1 flex flex-wrap gap-1">
                 {DAYS.map((d, i) => (
-                  <label key={d} className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-line px-2 py-1 text-xs">
+                  <label key={d} className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1 text-xs">
                     <input type="checkbox" checked={form.days.includes(i)} onChange={(e) => setForm({ ...form, days: e.target.checked ? [...form.days, i] : form.days.filter((x) => x !== i) })} />{d}
                   </label>
                 ))}

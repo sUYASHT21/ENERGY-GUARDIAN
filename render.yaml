@@ -1,0 +1,24 @@
+# Render blueprint for the FastAPI backend (the frontend goes to Vercel — see docs/DEPLOYMENT.md).
+# Render dashboard -> New -> Blueprint -> select this repository.
+services:
+  - type: web
+    name: energy-guardian-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false            # set a strong password (>= 10 chars) in the dashboard
+      - key: CORS_ORIGINS
+        sync: false            # e.g. https://energy-guardian.vercel.app
+      - key: CORS_ORIGIN_REGEX
+        value: https://.*\.vercel\.app
+      - key: REAL_SWITCHING_ENABLED
+        value: "false"
+      - key: SIMULATION_ENABLED
+        value: "true"

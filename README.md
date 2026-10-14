@@ -11,6 +11,8 @@ estimated savings.
 
 ## Features
 
+* **Editorial UI** — serif headlines, soft cards, pill controls and a warm colour palette
+  (see docs/DESIGN.md), full dark mode.
 * **Live dashboard** — power, energy today, cost, waste in vacant rooms, *estimated* savings
   (kWh / cost / CO₂), room occupancy, appliance status, device health, open alerts; WebSocket
   updates with HTTP fallback; light/dark themes; responsive down to phone width.
@@ -58,7 +60,12 @@ docker compose up --build
 Behind a TLS-intercepting corporate proxy, pass its CA to the build:
 `EXTRA_CA_FILE=/path/ca.pem docker compose -f docker-compose.yml -f docker-compose.proxy-ca.yml up --build`
 
-### Option B — local development (Python ≥ 3.11, Node ≥ 20)
+### Option B — cloud (Vercel + Render)
+
+Frontend on Vercel, backend on Render — see **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
+(`vercel.json` and `render.yaml` are included).
+
+### Option C — local development (Python ≥ 3.11, Node ≥ 20)
 
 ```bash
 make setup            # backend/.venv + pip install, frontend npm ci
@@ -113,6 +120,8 @@ emulator, hardware safety gate).
 | [API.md](docs/API.md) | all REST endpoints, WebSocket messages |
 | [ML.md](docs/ML.md) | features, synthetic data, training, metrics and their limits |
 | [ENERGY.md](docs/ENERGY.md) | kWh integration, waste, tariffs, carbon, savings estimate |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Vercel (frontend) + Render (backend), Docker Compose |
+| [DESIGN.md](docs/DESIGN.md) | frontend design system (editorial serif, tint palette, validated chart colours) |
 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | progress log and known limitations |
 
 ## Configuration

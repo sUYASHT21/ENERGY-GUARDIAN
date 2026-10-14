@@ -35,13 +35,13 @@ export default function Alerts() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Alerts</h1>
+        <h1 className="display text-[34px] text-ink sm:text-[44px]">Alerts <em>that need you</em></h1>
         <div className="flex flex-wrap gap-2">
-          <div className="inline-flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="Status filter">
+          <div className="inline-flex rounded-full bg-surface-2 p-1" role="group" aria-label="Status filter">
             {(["open", "resolved", "all"] as const).map((s) => (
-              <button key={s} onClick={() => setStatus(s)} aria-pressed={status === s} className={cx("rounded-md px-3 py-1 text-sm", status === s ? "bg-accent-wash font-semibold text-accent-ink" : "text-ink-2")}>{humanize(s)}</button>
+              <button key={s} onClick={() => setStatus(s)} aria-pressed={status === s} className={cx("rounded-full px-3.5 py-1 text-sm transition", status === s ? "bg-ink font-[480] text-surface" : "text-ink-2")}>{humanize(s)}</button>
             ))}
           </div>
           <select className={cx(inputCls, "w-auto")} value={type} onChange={(e) => setType(e.target.value)} aria-label="Alert type">
@@ -66,13 +66,13 @@ export default function Alerts() {
                   <span className="text-xs text-muted" title={formatDateTime(a.created_at)}>first {timeAgo(a.created_at)} · last {timeAgo(a.last_seen_at)} · {a.occurrences}×</span>
                 </div>
                 <h3 className="mt-1.5 font-medium">{a.title}</h3>
-                {a.message && <p className="text-sm text-ink-2">{a.message}</p>}
+                {a.message && <p className="mt-2 text-[16px] text-muted">{a.message}</p>}
                 {decision?.blockers && decision.blockers.length > 0 && (
                   <p className="mt-1 text-xs text-ink-2">Automatic action blocked by: {decision.blockers.map(humanize).join(", ")}</p>
                 )}
                 {a.recommendation && <p className="mt-1 text-sm"><span className="font-medium">Recommendation:</span> {a.recommendation}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-2">
-                  {a.room_id && <Link className="text-accent-ink hover:underline" to={`/rooms/${a.room_id}`}>{roomName(a.room_id) ?? `Room ${a.room_id}`}</Link>}
+                  {a.room_id && <Link className="text-ink underline-offset-4 hover:underline" to={`/rooms/${a.room_id}`}>{roomName(a.room_id) ?? `Room ${a.room_id}`}</Link>}
                   {a.acknowledged && <span>Acknowledged by {a.acknowledged_by} {timeAgo(a.acknowledged_at)}</span>}
                   {a.resolved && a.resolution_note && <span>· {a.resolution_note}</span>}
                 </div>

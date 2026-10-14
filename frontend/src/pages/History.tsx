@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { HistoryPoint, Room } from "../api/types";
 import { EnergyBarChart, Legend, RoomBarChart } from "../components/charts";
-import { Card, Empty, ErrorBanner, SourceBadge, Spinner, cx, inputCls } from "../components/ui";
+import { Card, Empty, ErrorBanner, SourceBadge, Spinner, cx, inputCls, type Tint } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { formatKwh, formatMoney } from "../lib/format";
 
@@ -27,14 +27,14 @@ export default function History() {
   const labelFmt = (p: string) => (hist.data?.group === "day" ? p.slice(5) : p.slice(11, 16));
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Energy history</h1>
+        <h1 className="display text-[34px] text-ink sm:text-[44px]">Energy <em>history</em></h1>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="Time range">
+          <div className="inline-flex rounded-full bg-surface-2 p-1" role="group" aria-label="Time range">
             {RANGES.map((r) => (
               <button key={r.key} onClick={() => setRange(r.key)} aria-pressed={range === r.key}
-                className={cx("rounded-md px-3 py-1 text-sm", range === r.key ? "bg-accent-wash font-semibold text-accent-ink" : "text-ink-2")}>{r.label}</button>
+                className={cx("rounded-full px-3.5 py-1 text-sm transition", range === r.key ? "bg-ink font-[480] text-surface" : "text-ink-2")}>{r.label}</button>
             ))}
           </div>
           <select className={cx(inputCls, "w-auto")} value={roomId} onChange={(e) => setRoomId(e.target.value)} aria-label="Room filter">
@@ -45,15 +45,15 @@ export default function History() {
       </div>
       <ErrorBanner error={hist.error} onRetry={hist.reload} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi label="Energy" value={formatKwh(tot.e)} />
-        <Kpi label="Wasted (vacant rooms)" value={formatKwh(tot.w)} sub={tot.e ? `${((tot.w / tot.e) * 100).toFixed(1)}% of total` : undefined} />
-        <Kpi label="Cost" value={formatMoney(tot.c, cur)} />
-        <Kpi label="Data source" value={<span className="flex flex-wrap gap-1">{tot.sim > 0 && <SourceBadge source="simulation" />}{tot.hw > 0 && <SourceBadge source="hardware" />}{tot.e === 0 && "—"}</span>}
+        <Kpi tint="sky" label="Energy" value={formatKwh(tot.e)} />
+        <Kpi tint="rose" label="Wasted (vacant rooms)" value={formatKwh(tot.w)} sub={tot.e ? `${((tot.w / tot.e) * 100).toFixed(1)}% of total` : undefined} />
+        <Kpi tint="butter" label="Cost" value={formatMoney(tot.c, cur)} />
+        <Kpi tint="lilac" label="Data source" value={<span className="flex flex-wrap gap-1">{tot.sim > 0 && <SourceBadge source="simulation" />}{tot.hw > 0 && <SourceBadge source="hardware" />}{tot.e === 0 && "—"}</span>}
           sub={tot.sim > 0 ? `${formatKwh(tot.sim)} simulated` : undefined} />
       </div>
       <Card title={hist.data?.group === "day" ? "Energy per day" : "Energy per hour"} subtitle={`Timezone ${hist.data?.timezone ?? ""}. Periods without telemetry show as zero.`}
         actions={<><Legend items={[{ color: "var(--series-1)", label: "Used (occupied)" }, { color: "var(--series-2)", label: "Wasted (vacant)" }]} />
-          <button className="text-xs text-accent-ink hover:underline" onClick={() => setShowTable(!showTable)}>{showTable ? "Hide table" : "Show table"}</button></>}>
+          <button className="text-xs text-ink underline-offset-4 hover:underline" onClick={() => setShowTable(!showTable)}>{showTable ? "Hide table" : "Show table"}</button></>}>
         {!hist.data ? <Spinner /> : series.length === 0 ? <Empty>No data</Empty> : <EnergyBarChart series={series} currency={cur} labelFmt={labelFmt} height={300} />}
         {showTable && (
           <div className="mt-4 max-h-80 overflow-auto">
@@ -74,12 +74,12 @@ export default function History() {
   );
 }
 
-function Kpi({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+function Kpi({ label, value, sub, tint }: { label: string; value: React.ReactNode; sub?: string; tint: Tint }) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-3">
-      <div className="text-xs text-ink-2">{label}</div>
-      <div className="mt-1 text-lg font-semibold">{value}</div>
-      {sub && <div className="text-xs text-muted">{sub}</div>}
+    <div className={`rounded-3xl p-5 tint-${tint}`}>
+      <div className="text-[13px] opacity-80">{label}</div>
+      <div className="display mt-1 text-[28px] leading-tight">{value}</div>
+      {sub && <div className="text-[12px] opacity-75">{sub}</div>}
     </div>
   );
 }

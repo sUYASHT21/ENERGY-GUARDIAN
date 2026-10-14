@@ -41,9 +41,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">Settings</h1>
+        <h1 className="display text-[34px] text-ink sm:text-[44px]">System <em>settings</em></h1>
         {admin ? <Button variant="primary" busy={busy} onClick={save}>Save changes</Button> : <StatusPill tone="neutral" label="Read-only (admin required)" icon={<Lock className="size-3.5" />} />}
       </div>
       <ErrorBanner error={error} />
@@ -53,7 +53,7 @@ export default function Settings() {
         <Card title="Automation mode">
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             {MODES.map((m) => (
-              <label key={m.value} className={`cursor-pointer rounded-lg border p-3 text-sm ${form.automation_mode === m.value ? "border-accent bg-accent-wash" : "border-line"}`}>
+              <label key={m.value} className={`cursor-pointer rounded-2xl border p-3 text-sm ${form.automation_mode === m.value ? "border-transparent tint-sky" : "border-line"}`}>
                 <span className="flex items-center gap-2 font-medium"><input type="radio" name="mode" checked={form.automation_mode === m.value} onChange={() => setForm({ ...form, automation_mode: m.value })} />{m.label}</span>
                 <span className="mt-1 block text-xs text-ink-2">{m.help}</span>
               </label>

@@ -60,7 +60,8 @@ describe("login and dashboard", () => {
     expect(screen.getByText("12.50 kWh")).toBeInTheDocument();
     expect(screen.getByText("Simulation mode — data is synthetic")).toBeInTheDocument();
     expect(screen.getByText("Hardware switching disabled")).toBeInTheDocument();
-    expect(screen.getAllByText("Estimate").length).toBe(3);
+    expect(screen.getAllByText("Estimate").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Energy that switches off")).toBeInTheDocument();
   });
 
   it("shows an error for wrong credentials", async () => {

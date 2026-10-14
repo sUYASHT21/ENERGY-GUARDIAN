@@ -11,7 +11,7 @@ export type Handler = (url: string, init: RequestInit) => unknown | Promise<unkn
 export function mockApi(routes: Record<string, Handler | unknown>) {
   const calls: { method: string; url: string; body: unknown }[] = [];
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init: RequestInit = {}) => {
-    const url = String(input).replace(/^\/api\/v1/, "");
+    const url = String(input).replace(/^(https?:\/\/[^/]+)?\/api\/v1/, "");
     const method = (init.method ?? "GET").toUpperCase();
     const body = init.body ? JSON.parse(String(init.body)) : undefined;
     calls.push({ method, url, body });

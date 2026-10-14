@@ -2,7 +2,7 @@
    series built from summaries, and per-message-type version counters that pages use to
    refetch exactly when relevant data changes. */
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { api } from "../api/client";
+import { API_ORIGIN, api } from "../api/client";
 import type { LivePoint, Summary } from "../api/types";
 
 export type WsStatus = "connecting" | "open" | "closed";
@@ -19,8 +19,10 @@ const LiveContext = createContext<LiveState>({ status: "closed", summary: null, 
 const MAX_POINTS = 240;
 
 export function wsUrl(token: string): string {
+  const q = `/ws?token=${encodeURIComponent(token)}`;
+  if (API_ORIGIN) return API_ORIGIN.replace(/^http/, "ws") + q;
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
-  return `${proto}://${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+  return `${proto}://${window.location.host}${q}`;
 }
 
 export function LiveProvider({ token, children }: { token: string | null; children: ReactNode }) {

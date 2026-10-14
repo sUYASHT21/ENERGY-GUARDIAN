@@ -44,12 +44,12 @@ export default function RoomDetail() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <Link to="/rooms" className="inline-flex items-center gap-1 text-sm text-ink-2 hover:text-ink"><ArrowLeft className="size-4" />All rooms</Link>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">{room.name}</h1>
-          <p className="text-sm text-ink-2">{humanize(room.room_type)} · {room.building || "no building"} · capacity {room.capacity} · min. vacancy {room.min_vacancy_minutes} min</p>
+          <h1 className="display text-[34px] text-ink sm:text-[44px]">{room.name}</h1>
+          <p className="mt-2 text-[16px] text-muted">{humanize(room.room_type)} · {room.building || "no building"} · capacity {room.capacity} · min. vacancy {room.min_vacancy_minutes} min</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <StatusPill tone={occupancyTone(room.occupancy_state)} label={`${humanize(room.occupancy_state)}${room.people_count ? ` · ${room.people_count} people` : ""}`} />
             {room.occupancy_source && <SourceBadge source={room.occupancy_source} />}
@@ -83,7 +83,7 @@ export default function RoomDetail() {
           </ul>
           <h3 className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted">Scheduled sessions</h3>
           <ul className="mt-1 text-sm text-ink-2">
-            {schedules.length === 0 && <li>None — <Link className="text-accent-ink hover:underline" to="/schedules">add schedules</Link></li>}
+            {schedules.length === 0 && <li>None — <Link className="text-ink underline-offset-4 hover:underline" to="/schedules">add schedules</Link></li>}
             {schedules.map((s) => <li key={s.id}>{DAYS[s.day_of_week]} {s.start_time}–{s.end_time} {s.label && `· ${s.label}`}{!s.enabled && " (disabled)"}</li>)}
           </ul>
         </Card>
@@ -142,7 +142,7 @@ function ApplianceRow({ a, onChanged, onEdit }: { a: Appliance & { decision: Dec
   const d = a.decision;
   const groups: [string, string][] = [["data", "Data quality"], ["waste", "Wastage"], ["safety", "Safety policy"], ["mode", "Mode / hardware gate"]];
   return (
-    <div className="rounded-lg border border-line">
+    <div className="rounded-2xl border border-line">
       <div className="flex flex-wrap items-center gap-3 p-3">
         <button onClick={() => setOpen(!open)} className="rounded p-1 text-muted hover:bg-surface-2" aria-expanded={open} aria-label={`Show decision checks for ${a.name}`}>
           {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}

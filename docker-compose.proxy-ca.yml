@@ -1,0 +1,12 @@
+# Optional override for networks with a TLS-intercepting proxy:
+#   EXTRA_CA_FILE=/path/to/proxy-ca.pem docker compose -f docker-compose.yml -f docker-compose.proxy-ca.yml up --build
+services:
+  backend:
+    build:
+      secrets: [extra_ca]
+  frontend:
+    build:
+      secrets: [extra_ca]
+secrets:
+  extra_ca:
+    file: ${EXTRA_CA_FILE:?set EXTRA_CA_FILE to your proxy CA bundle}

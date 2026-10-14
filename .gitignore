@@ -24,3 +24,4 @@ frontend/playwright-report/
 .idea/
 .vscode/
 *.tsbuildinfo
+firmware/esp32/**/config.h

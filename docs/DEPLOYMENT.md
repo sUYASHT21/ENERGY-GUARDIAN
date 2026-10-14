@@ -1,121 +1,134 @@
-# Deployment — free cloud stack (Vercel + Render + Supabase)
+# Deployment — 100 % free stack (no credit card)
 
 ```mermaid
 flowchart LR
-  U[Browser] -->|HTTPS| V[Vercel<br/>React dashboard]
-  U -->|REST + WebSocket| R[Render<br/>FastAPI backend<br/>simulator · monitor · ML · ESP32 API]
-  E[ESP32 / emulator] -->|HTTPS| R
-  R -->|SQL over TLS| S[(Supabase<br/>Postgres)]
-  P[UptimeRobot<br/>ping every 5 min] -->|/api/v1/health| R
+  U[Browser] -->|HTTPS| V[Vercel Hobby<br/>React dashboard]
+  U -->|REST + WebSocket| H[Hugging Face Space<br/>Docker · FastAPI backend<br/>simulator · monitor · ML · ESP32 API]
+  E[ESP32 / emulator] -->|HTTPS| H
+  H -->|SQL over TLS<br/>Session pooler| S[(Supabase Free<br/>Postgres)]
+  P[UptimeRobot Free<br/>ping every 5 min] -->|/api/v1/health| H
+  G[GitHub main] -->|auto-deploy| V
+  G -->|GitHub Action| H
 ```
 
-| Part | Service (free plan) | Why this host |
+| Part | Service | Cost |
 |---|---|---|
-| Dashboard | **Vercel** | static React build, global CDN, auto-deploy from `main` |
-| Backend | **Render** web service (Docker) | needs a *long-running* process (3 s simulator/monitor loops, WebSockets) — Vercel functions can't do that |
-| Database | **Supabase** Postgres | persistent, managed, web table editor; survives backend restarts |
-| Keep-awake | **UptimeRobot** (or cron-job.org) | Render free instances sleep after ~15 min without traffic |
+| Dashboard | **Vercel** Hobby | free, no card |
+| Backend | **Hugging Face Spaces** — Docker, CPU basic | free, no card |
+| Database | **Supabase** Free — use the **Session pooler** connection | free, no card |
+| Keep-awake | **UptimeRobot** Free | free, no card |
 
-Everything deploys automatically when you push to `main`. Free-plan limits change — check them when
-you sign up. Known ones: Render free instances sleep when idle (hence the pinger); Supabase pauses a
-project after 7 days without activity (the running backend writes constantly, so this does not
-trigger while it is awake); Vercel Hobby is for non-commercial use.
+> **Do not** buy Supabase's "IPv4 add-on". It is only needed for the *Direct connection*; the
+> **Session pooler** connection used here works over IPv4 for free.
 
----
+Why a separate backend host at all? The backend must run continuously (3-second simulator and
+safety-monitor loops, WebSockets). Vercel functions stop after each request and Supabase does not
+run Python, so the FastAPI app lives in a free Docker Space.
 
-## Step 1 — Supabase (database)
-
-1. <https://supabase.com> → **New project**. Pick a region close to your Render region, set a
-   **database password** (save it).
-2. When it is ready, click **Connect** (top bar) → **Session pooler** → copy the URI. It looks like
-   `postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-0-<region>.pooler.supabase.com:5432/postgres`
-   * Replace `[YOUR-PASSWORD]`. If it contains special characters (`@ : / ? # %`), URL-encode them
-     (e.g. `@` → `%40`).
-   * Use the **Session pooler** URI, not "Direct connection": the direct host is IPv6-only on the
-     free plan, while Render connects over IPv4.
-3. Nothing else to do — the backend creates its tables on first start. Afterwards you can browse
-   `rooms`, `alerts`, `telemetry`, `commands`, … in **Table Editor**.
-
-> Security: the app talks to Postgres directly with this URI; it does not use Supabase's public
-> REST API. Keep the URI secret (Render environment variable only). Leaving Row Level Security off
-> is fine because the anon REST key is never used — or enable RLS on all tables to lock the REST
-> API down completely; the backend's direct connection is unaffected.
-
-## Step 2 — Render (backend)
-
-1. <https://render.com> → sign in with GitHub → **New → Blueprint** → select this repository.
-   Render reads `render.yaml` and creates `energy-guardian-api`.
-2. Fill in the variables it asks for:
-
-   | Variable | Value |
-   |---|---|
-   | `DATABASE_URL` | the Supabase Session pooler URI from step 1 |
-   | `ADMIN_PASSWORD` | a strong password (≥ 10 chars) — your dashboard login |
-   | `CORS_ORIGINS` | your Vercel URL from step 3 (you can fill it in after step 3), e.g. `https://energy-guardian.vercel.app` |
-
-   `SECRET_KEY` is generated automatically; `APP_ENV=production` refuses weak/default secrets;
-   `REAL_SWITCHING_ENABLED=false` keeps hardware switching off; `CORS_ORIGIN_REGEX` already allows
-   `*.vercel.app` preview URLs.
-3. Deploy. Check `https://<your-service>.onrender.com/api/v1/health` → `{"status":"ok",…}`.
-   First boot seeds the demo campus + 7 days of simulated history into Supabase and trains the
-   model (≈ 1 min including the image build).
-4. API docs: `https://<your-service>.onrender.com/docs`.
-
-## Step 3 — Vercel (dashboard)
-
-1. <https://vercel.com> → sign in with GitHub → **Add New → Project** → import this repository.
-   Leave **Root Directory** as the repository root (build settings come from `vercel.json`).
-2. **Environment Variables** → add `VITE_API_URL` = `https://<your-service>.onrender.com`
-   (no trailing slash).
-3. **Deploy** → open the URL, sign in as `admin` with your `ADMIN_PASSWORD`.
-4. Put this URL into Render's `CORS_ORIGINS` (step 2) if you have not yet; Render redeploys.
-
-## Step 4 — Keep the backend awake (UptimeRobot)
-
-1. <https://uptimerobot.com> → free account → **New monitor** → type **HTTP(s)**.
-2. URL: `https://<your-service>.onrender.com/api/v1/health`, interval **5 minutes**.
-3. Bonus: it emails you if the backend goes down.
-
-Backup option without another account: this repo has `.github/workflows/keepalive.yml` — add a
-repository variable `BACKEND_URL` (GitHub → Settings → Secrets and variables → Actions →
-Variables) and it pings every 10 minutes (GitHub may delay scheduled runs, so prefer UptimeRobot).
-
-## Step 5 — Connect real or emulated ESP32s
-
-Point devices at the Render URL (`SEG_BASE_URL` in `firmware/esp32/.../config.h`, or
-`python tools/esp32_emulator.py --base-url https://<your-service>.onrender.com --register
---admin-password <ADMIN_PASSWORD>`). See [HARDWARE.md](HARDWARE.md).
+Free-plan behaviour to know: free Spaces sleep after a period without visits and Supabase pauses a
+project after a week of inactivity — the UptimeRobot ping keeps the Space awake, and the awake
+backend writes to Supabase constantly, so neither happens. Free Spaces must be **public** for the
+dashboard to reach them (only the backend code is visible; secrets stay private in the Space
+settings). Plans change over time — check limits when you sign up.
 
 ---
 
-## What happens on a restart / redeploy
+## Step 1 — Supabase connection string
 
-* Rooms, devices, telemetry, energy history, alerts, commands, users and settings live in Supabase
-  and are untouched; the demo campus is **not** re-seeded.
-* The model registry lives in Supabase; Render's disk is ephemeral, so on boot the backend rebuilds
-  the active model from its stored parameters (training is deterministic: same seed → identical
-  model and metrics; tested in `tests/test_ml.py`).
-* The simulator's per-room scenarios reset to their defaults (in-memory by design).
+1. Supabase dashboard → your project → **Connect** (top bar).
+2. Choose **Session pooler** (not "Direct connection"). Copy the URI:
+   `postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-<n>-<region>.pooler.supabase.com:5432/postgres`
+3. Replace `[YOUR-PASSWORD]` with your database password. Special characters (`@ ! : / # ?`) can
+   be pasted as-is — the backend encodes them automatically.
+
+The backend creates all tables on first start; browse them later under **Table Editor**.
+The project URL and publishable key are **not** needed — the backend connects to Postgres directly.
+
+## Step 2 — Hugging Face Space (backend)
+
+1. Create a free account at <https://huggingface.co> (no card).
+2. **New → Space**: name `energy-guardian-api`, SDK **Docker** → *Blank*, hardware
+   **CPU basic · Free**, visibility **Public** → Create.
+3. Space → **Settings → Variables and secrets**:
+
+   | Type | Name | Value |
+   |---|---|---|
+   | Secret | `DATABASE_URL` | the Session pooler URI from step 1 |
+   | Secret | `SECRET_KEY` | a long random string, e.g. output of `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
+   | Secret | `ADMIN_PASSWORD` | your dashboard login password (≥ 10 characters) |
+   | Variable | `APP_ENV` | `production` |
+   | Variable | `MODEL_DIR` | `/tmp/models` |
+   | Variable | `CORS_ORIGINS` | your Vercel URL from step 4, e.g. `https://energy-guardian.vercel.app` |
+   | Variable | `CORS_ORIGIN_REGEX` | `https://.*\.vercel\.app` |
+
+4. Hugging Face → **Settings → Access Tokens** → create a token with **Write** permission.
+
+## Step 3 — Connect GitHub → Space (automatic deploys)
+
+GitHub repository → **Settings → Secrets and variables → Actions**:
+
+* **Secrets** tab → `HF_TOKEN` = the write token from step 2.4
+* **Variables** tab → `HF_SPACE` = `<your-hf-username>/energy-guardian-api`
+
+Then GitHub → **Actions → Deploy backend to Hugging Face Space → Run workflow** (afterwards it runs
+on every push to `main` that touches `backend/`). The Space builds (≈ 3–5 min the first time);
+check `https://<your-hf-username>-energy-guardian-api.hf.space/api/v1/health`.
+
+## Step 4 — Vercel (dashboard)
+
+1. <https://vercel.com> → sign in with GitHub → **Add New → Project** → import this repository
+   (leave Root Directory as the repo root; settings come from `vercel.json`).
+2. **Environment Variables**: `VITE_API_URL` = `https://<your-hf-username>-energy-guardian-api.hf.space`
+3. **Deploy**, open the URL and sign in as `admin` with your `ADMIN_PASSWORD`.
+4. Put the Vercel URL into the Space variable `CORS_ORIGINS` (step 2.3) if you have not yet.
+
+## Step 5 — Keep it awake (UptimeRobot)
+
+<https://uptimerobot.com> → free account → **New monitor** → HTTP(s) →
+`https://<your-hf-username>-energy-guardian-api.hf.space/api/v1/health`, interval **5 minutes**.
+(Backup without another account: set the repository variable `BACKEND_URL` to the same base URL
+and `.github/workflows/keepalive.yml` pings every 10 minutes.)
+
+## Step 6 — ESP32 / emulator
+
+Point devices at the Space URL (`SEG_BASE_URL` in the firmware `config.h`), or:
+`python tools/esp32_emulator.py --base-url https://<user>-energy-guardian-api.hf.space --register --admin-password <ADMIN_PASSWORD>`
+
+---
+
+## Behaviour on restart / redeploy
+
+* All data (rooms, telemetry, history, alerts, commands, users, settings) lives in Supabase and is
+  kept; the demo campus is not re-seeded.
+* The Space disk is ephemeral: on boot the backend rebuilds the active ML model from the parameters
+  stored in Supabase (deterministic — identical model and metrics; tested).
+* Simulator scenarios reset to their defaults.
 
 ## Managing it
 
 | Task | Where |
 |---|---|
-| Deploy a change | push to `main` → Vercel and Render redeploy automatically |
-| Logs | Render → service → **Logs**; Vercel → project → **Deployments** |
-| Browse / edit data | Supabase → **Table Editor** or **SQL Editor** |
-| Backups | Supabase free has no automatic backups — export with `pg_dump "<DATABASE_URL>" > backup.sql` |
-| Reset everything | Supabase SQL Editor: `drop schema public cascade; create schema public;` then restart the Render service |
-| Rotate admin password | `PATCH /api/v1/users/{id}` with a new password (via `/docs`); the `ADMIN_PASSWORD` env var only seeds the first admin |
+| Deploy a change | push to `main` → Vercel redeploys the dashboard, the GitHub Action redeploys the Space |
+| Backend logs | Space → **Logs** tab |
+| Dashboard deployments | Vercel → project → **Deployments** |
+| Browse / edit data | Supabase → **Table Editor** / **SQL Editor** |
+| Backup | `pg_dump "<DATABASE_URL>" > backup.sql` (Supabase Free has no automatic backups) |
+| Reset all data | Supabase SQL Editor: `drop schema public cascade; create schema public;` → restart the Space |
+| Change admin password | `PATCH /api/v1/users/{id}` via `<space-url>/docs` (`ADMIN_PASSWORD` only seeds the first admin) |
 
-## Alternative: single machine (Docker Compose)
+## Security checklist
 
-Runs frontend (nginx), backend and a local SQLite database on one host:
+* Never commit `DATABASE_URL` or passwords — they belong only in the Space secrets.
+* If a database password was ever shared in chat or email, reset it: Supabase → **Project Settings
+  → Database → Reset database password**, then update the `DATABASE_URL` secret.
+* `REAL_SWITCHING_ENABLED` stays `false` (default) until real hardware is validated (docs/SAFETY.md).
 
-```bash
-cp .env.example .env    # set SECRET_KEY / ADMIN_PASSWORD (optionally DATABASE_URL=Supabase)
-docker compose up -d --build
-```
+## Alternatives
+
+* **Render** free web service: `render.yaml` blueprint is included (same env vars; Render may ask
+  for payment details on some accounts — use Hugging Face if it does).
+* **Single machine:** `docker compose up -d --build` (frontend + backend + local SQLite, or set
+  `DATABASE_URL` to Supabase).
 
 ## Testing against Postgres locally
 
@@ -123,5 +136,3 @@ docker compose up -d --build
 docker run -d --name seg-pg -e POSTGRES_PASSWORD=pgtest -e POSTGRES_DB=seg -p 5433:5432 postgres:16-alpine
 cd backend && TEST_DATABASE_URL=postgresql://postgres:pgtest@127.0.0.1:5433/seg .venv/bin/pytest
 ```
-
-CI runs the backend suite on both SQLite and Postgres.

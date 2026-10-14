@@ -12,7 +12,9 @@ RUN --mount=type=secret,id=extra_ca,required=false \
     pip install -r requirements.txt
 
 COPY app ./app
-RUN useradd --create-home --uid 10001 seg && mkdir -p /app/data && chown -R seg /app/data
+# Some hosts (e.g. Hugging Face Spaces) run the container under their own UID, so the data dir is
+# writable by any user. With DATABASE_URL pointing at Postgres it only holds the model artifact.
+RUN useradd --create-home --uid 10001 seg && mkdir -p /app/data && chmod 0777 /app/data
 USER seg
 
 ENV DATABASE_URL=sqlite:////app/data/energy_guardian.db \

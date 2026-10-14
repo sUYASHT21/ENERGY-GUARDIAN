@@ -49,8 +49,8 @@ flowchart LR
 
 ## Deployment topology
 
-Local: one machine (Docker Compose or dev servers) with SQLite. Cloud (free): Vercel serves the
-dashboard, Render runs the long-lived FastAPI process, Supabase hosts Postgres — see
+Local: one machine (Docker Compose or dev servers) with SQLite. Cloud (free, no card): Vercel serves
+the dashboard, a Hugging Face Docker Space runs the long-lived FastAPI process, Supabase hosts Postgres — see
 [DEPLOYMENT.md](DEPLOYMENT.md). The same code runs in both; only `DATABASE_URL` and
 `VITE_API_URL` differ.
 

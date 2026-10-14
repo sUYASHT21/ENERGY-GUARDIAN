@@ -88,3 +88,7 @@ Key entry points: `backend/app/main.py` (app factory, lifespan, WebSocket),
   model rebuild after ephemeral-disk restarts, `TEST_DATABASE_URL`, CI Postgres job, keep-alive
   workflow, deployment guide. Verified: 105 tests on SQLite and on PostgreSQL 16; production-mode
   restart on Postgres keeps data, no reseed, model rebuilt identically.
+- 2026-10-14: switched the recommended backend host to Hugging Face Spaces (free, no card):
+  Space README, GitHub Action auto-deploy, Dockerfile works under any UID; DATABASE_URL passwords
+  with special characters are encoded automatically. Rehearsed: Space image as uid 1000, production
+  mode, Postgres with an unencoded `@` password → healthy, seeded, model trained, 14 tables.

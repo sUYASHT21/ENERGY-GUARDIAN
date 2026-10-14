@@ -60,11 +60,11 @@ docker compose up --build
 Behind a TLS-intercepting corporate proxy, pass its CA to the build:
 `EXTRA_CA_FILE=/path/ca.pem docker compose -f docker-compose.yml -f docker-compose.proxy-ca.yml up --build`
 
-### Option B — free cloud stack (Vercel + Render + Supabase)
+### Option B — free cloud stack, no credit card (Vercel + Hugging Face + Supabase)
 
-Dashboard on **Vercel**, FastAPI backend on **Render**, database on **Supabase Postgres**, kept awake
-by a free UptimeRobot ping — all free tiers, auto-deployed from `main`. Step-by-step guide:
-**[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** (`vercel.json` and `render.yaml` included).
+Dashboard on **Vercel**, FastAPI backend in a free **Hugging Face Docker Space** (auto-deployed by a
+GitHub Action), database on **Supabase Postgres** (Session pooler — no paid add-on), kept awake by
+**UptimeRobot**. Step-by-step guide: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
 ### Option C — local development (Python ≥ 3.11, Node ≥ 20)
 
@@ -97,8 +97,8 @@ Latest local run (2026-10-14):
 
 | Suite | Result |
 |---|---|
-| Backend `pytest` on SQLite (energy maths, decision engine, ML, telemetry, API/auth/validation, ESP32 protocol, end-to-end simulator scenarios, config) | **105 passed** |
-| Backend `pytest` against **PostgreSQL 16** (`TEST_DATABASE_URL`) | **105 passed** |
+| Backend `pytest` on SQLite (energy maths, decision engine, ML, telemetry, API/auth/validation, ESP32 protocol, end-to-end simulator scenarios, config) | **108 passed** |
+| Backend `pytest` against **PostgreSQL 16** (`TEST_DATABASE_URL`) | **108 passed** |
 | Backend `ruff` | clean |
 | Frontend `tsc` + `vitest` (formatters, components, login→dashboard, decision explanation, commands, alerts, settings, live-refresh regression) | **18 passed** |
 | Frontend production build | OK |
@@ -122,7 +122,7 @@ emulator, hardware safety gate).
 | [API.md](docs/API.md) | all REST endpoints, WebSocket messages |
 | [ML.md](docs/ML.md) | features, synthetic data, training, metrics and their limits |
 | [ENERGY.md](docs/ENERGY.md) | kWh integration, waste, tariffs, carbon, savings estimate |
-| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | free cloud stack: Vercel + Render + Supabase Postgres + UptimeRobot; Docker Compose |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | free, no-card cloud stack: Vercel + Hugging Face Spaces + Supabase + UptimeRobot; Docker Compose |
 | [DESIGN.md](docs/DESIGN.md) | frontend design system (editorial serif, tint palette, validated chart colours) |
 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | progress log and known limitations |
 

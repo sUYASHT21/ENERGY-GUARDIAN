@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from urllib.parse import quote, unquote
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
@@ -13,12 +14,25 @@ class Base(DeclarativeBase):
     pass
 
 
+def _encode_password(rest: str) -> str:
+    """Percent-encode the password in ``user:password@host...`` so passwords containing ``@``,
+    ``:``, ``/``, ``#`` or ``?`` work when pasted verbatim. Already-encoded passwords are kept."""
+    at = rest.rfind("@")
+    if at < 0:
+        return rest
+    userinfo, hostpart = rest[:at], rest[at + 1:]
+    user, sep, password = userinfo.partition(":")
+    if not sep:
+        return rest
+    return f"{user}:{quote(unquote(password), safe='')}@{hostpart}"
+
+
 def normalize_url(url: str) -> str:
     """Accept the URI formats hosting providers hand out (e.g. Supabase's ``postgresql://`` or the
-    legacy ``postgres://``) and select the psycopg 3 driver."""
-    for prefix in ("postgres://", "postgresql://"):
+    legacy ``postgres://``), select the psycopg 3 driver and encode special password characters."""
+    for prefix in ("postgres://", "postgresql://", "postgresql+psycopg://"):
         if url.startswith(prefix):
-            return "postgresql+psycopg://" + url[len(prefix):]
+            return "postgresql+psycopg://" + _encode_password(url[len(prefix):])
     return url
 
 

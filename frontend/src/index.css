@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/* Design tokens. Every colour in the UI is a token so dark mode is a token swap.
+   Chart palette = validated reference palette (blue / orange / aqua), see docs/FRONTEND.md. */
+:root {
+  color-scheme: light;
+  --bg: #f4f4f1;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --border: rgba(11, 11, 11, 0.1);
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d68;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --accent: #2a78d6;
+  --accent-ink: #1c5cab;
+  --accent-wash: rgba(42, 120, 214, 0.1);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --good: #0ca30c;
+  --good-ink: #006300;
+  --warning: #fab219;
+  --warning-ink: #8a5a00;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --critical-ink: #b42b2b;
+  --sim: #6250d6;
+  --sim-wash: rgba(98, 80, 214, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --border: rgba(255, 255, 255, 0.1);
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --muted: #9a988f;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --accent: #3987e5;
+    --accent-ink: #86b6ef;
+    --accent-wash: rgba(57, 135, 229, 0.14);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --good-ink: #0ca30c;
+    --warning-ink: #fab219;
+    --critical-ink: #e66767;
+    --sim: #9085e9;
+    --sim-wash: rgba(144, 133, 233, 0.14);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --border: rgba(255, 255, 255, 0.1);
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --muted: #9a988f;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --accent: #3987e5;
+  --accent-ink: #86b6ef;
+  --accent-wash: rgba(57, 135, 229, 0.14);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --good-ink: #0ca30c;
+  --warning-ink: #fab219;
+  --critical-ink: #e66767;
+  --sim: #9085e9;
+  --sim-wash: rgba(144, 133, 233, 0.14);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-wash: var(--accent-wash);
+  --color-good: var(--good);
+  --color-good-ink: var(--good-ink);
+  --color-warning: var(--warning);
+  --color-warning-ink: var(--warning-ink);
+  --color-serious: var(--serious);
+  --color-critical: var(--critical);
+  --color-critical-ink: var(--critical-ink);
+  --color-sim: var(--sim);
+  --color-sim-wash: var(--sim-wash);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recharts: keep chart chrome recessive and token-driven */
+.recharts-cartesian-grid line {
+  stroke: var(--grid);
+}
+.recharts-cartesian-axis-tick-value {
+  fill: var(--muted);
+  font-size: 11px;
+}
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: var(--axis);
+}
+.recharts-tooltip-cursor {
+  stroke: var(--axis);
+}

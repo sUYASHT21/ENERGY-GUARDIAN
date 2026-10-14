@@ -62,6 +62,11 @@ class Settings(BaseSettings):
     history_backfill_days: int = Field(default=7, ge=0, le=60)
     simulation_seed: int = 42
 
+    # --- Single-process local hosting -------------------------------------------
+    # Serve the built dashboard (frontend/dist) from this server, so `run-local` needs one port.
+    serve_frontend: bool = True
+    frontend_dist: Path | None = None  # default: <repo>/frontend/dist when it exists
+
     # --- Background work --------------------------------------------------------
     background_tasks_enabled: bool = True
     ml_autotrain: bool = True
@@ -70,6 +75,10 @@ class Settings(BaseSettings):
     @classmethod
     def _expand_path(cls, v):  # noqa: N805
         return Path(v).expanduser()
+
+    @property
+    def frontend_dist_dir(self) -> Path:
+        return (self.frontend_dist or BACKEND_DIR.parent / "frontend" / "dist").expanduser()
 
     @model_validator(mode="after")
     def _check_security(self) -> Settings:

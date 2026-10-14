@@ -5,11 +5,13 @@ import asyncio
 import contextlib
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import APIRouter, FastAPI, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import __version__
@@ -158,4 +160,25 @@ def create_app(settings: Settings | None = None, clock: Clock | None = None) -> 
         finally:
             ctx.bus.unsubscribe(q)
 
+    dist = settings.frontend_dist_dir
+    if settings.serve_frontend and (dist / "index.html").is_file():
+        mount_frontend(app, dist)
+        log.info("Serving dashboard from %s", dist)
+
     return app
+
+
+def mount_frontend(app: FastAPI, dist: Path) -> None:
+    """Serve the built single-page app; unknown non-API paths fall back to index.html."""
+    root = dist.resolve()
+    if (root / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=root / "assets"), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa(full_path: str):
+        if full_path.startswith(("api/", "api", "ws")):
+            raise StarletteHTTPException(404, "not found")
+        candidate = (root / full_path).resolve()
+        if full_path and candidate.is_file() and root in candidate.parents:
+            return FileResponse(candidate)
+        return FileResponse(root / "index.html")

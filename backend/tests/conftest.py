@@ -35,7 +35,7 @@ def make_settings(tmp_path: Path, **overrides) -> Settings:
         app_env="test", database_url=fresh_database_url(tmp_path), model_dir=tmp_path / "models",
         secret_key="x" * 40, admin_password=ADMIN_PW, background_tasks_enabled=False, simulation_autostart=False,
         seed_demo_data=False, history_backfill_days=0, ml_autotrain=False, log_level="WARNING",
-        command_timeout_seconds=20, device_offline_seconds=30, telemetry_stale_seconds=45,
+        command_timeout_seconds=20, device_offline_seconds=30, telemetry_stale_seconds=45, serve_frontend=False,
     )
     base.update(overrides)
     return Settings(**base)

@@ -47,7 +47,21 @@ docs/           architecture, API, hardware, safety, ML, energy maths, demo, imp
 
 ## Quick start
 
-### Option A — Docker Compose (recommended)
+### Fastest — one command, one port (no Docker)
+
+Needs **Python 3.11+** and **Node.js 20+**.
+
+```bash
+./run-local.sh          # macOS / Linux
+run-local.bat           # Windows (double-click or run in a terminal)
+```
+
+Open <http://localhost:8000> and sign in with `admin` / `guardian-demo`. The first run installs
+dependencies and builds the dashboard (a few minutes); later runs start in seconds. Add
+`--rebuild` after changing frontend code. Other devices on the same Wi-Fi (phone, ESP32) can reach
+it at `http://<your-computer-ip>:8000`.
+
+### Option A — Docker Compose
 
 ```bash
 cp .env.example .env          # edit SECRET_KEY / ADMIN_PASSWORD for anything beyond a local demo

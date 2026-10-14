@@ -114,3 +114,23 @@ def test_feature_extraction():
     assert f["voltage_dev"] == pytest.approx(0.1)
     assert f["power_factor"] == pytest.approx(0.5)
     assert f["relay_mismatch"] == 1.0
+
+
+def test_missing_artifact_is_rebuilt_identically(ctx, tmp_path):
+    """Simulates a restart on an ephemeral host: registry in the DB, model file gone."""
+    import shutil
+
+    from app.models import MLModelRecord
+    from app.services import ml_service
+
+    with ctx.db.session() as db:
+        rec = ml_service.train_and_activate(ctx, db, seed=11)
+        version, metrics = rec.version, rec.metrics
+    shutil.rmtree(ctx.settings.model_dir)  # "restart": local disk wiped
+    ctx.anomaly.unload()
+    with ctx.db.session() as db:
+        assert ml_service.load_active(ctx, db)
+        assert db.query(MLModelRecord).count() == 1  # no duplicate registration
+    assert ctx.anomaly.method == "isolation_forest" and ctx.anomaly.version == version
+    ml_reloaded = ml.train(tmp_path, seed=11, version="check")
+    assert ml_reloaded.metrics == metrics

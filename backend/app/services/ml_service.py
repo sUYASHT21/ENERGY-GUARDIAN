@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -55,4 +56,20 @@ def load_active(ctx: AppContext, db: Session) -> bool:
     rec = db.query(MLModelRecord).filter(MLModelRecord.active.is_(True)).first()
     if rec is None:
         return False
+    if not Path(rec.path).exists():
+        # Ephemeral hosts (e.g. Render free tier) lose local files on restart while the registry
+        # lives on in Postgres. Training is deterministic for a given seed, so rebuild the exact
+        # same model from the stored parameters instead of registering a new one.
+        p = rec.params or {}
+        log.info("Model artifact for %s missing — rebuilding it from stored parameters", rec.version)
+        try:
+            res = ml.train(ctx.settings.model_dir, seed=int(p.get("seed", 42)),
+                           n_estimators=int(p.get("n_estimators", 200)),
+                           contamination=float(p.get("contamination", 0.04)), version=rec.version)
+        except Exception:  # pragma: no cover - fall back to rules, bootstrap may retrain
+            log.exception("Rebuilding model %s failed", rec.version)
+            return False
+        if res.metrics != rec.metrics:
+            log.warning("Rebuilt model %s differs from the recorded metrics (library version change?)", rec.version)
+        rec.path = str(res.path)
     return ctx.anomaly.load(rec.path, rec.version)

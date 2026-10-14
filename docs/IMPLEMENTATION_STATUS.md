@@ -20,7 +20,8 @@ This file is the resume point for development. Update it at the end of every sta
 | 11 | Frontend tests (vitest) + Playwright E2E | done — 18 unit + 4 E2E passing |
 | 12 | Docker Compose, CI workflow | done — stack built and E2E-verified locally |
 | 13 | Documentation | done |
-| 14 | UI redesign per docs/DESIGN_REFERENCE.md (+ colour), Vercel/Render deployment config | done — deploy itself pending (Vercel blocked from build environment) |
+| 14 | UI redesign per docs/DESIGN_REFERENCE.md (+ colour), Vercel/Render deployment config | done |
+| 15 | Free cloud stack: Supabase Postgres support, deterministic model rebuild, keep-alive, CI on Postgres | done — actual cloud deploy requires the owner's accounts (see docs/DEPLOYMENT.md) |
 
 ## How to resume
 
@@ -64,7 +65,8 @@ Key entry points: `backend/app/main.py` (app factory, lifespan, WebSocket),
 
 - ESP32 firmware not compiled or run on hardware (no toolchain/hardware in the build environment).
 - ML evaluated only on synthetic data; voltage-fault recall 59 %. Needs labelled field data.
-- No database migrations (Alembic) — schema changes require a fresh DB in this version.
+- No database migrations (Alembic) — schema changes require a fresh DB in this version
+  (on Supabase: reset the schema, see docs/DEPLOYMENT.md).
 - In-memory login rate limiting and event bus → single backend process (no horizontal scaling).
 - No HTTPS termination in the compose file; put a TLS reverse proxy in front for real deployments
   (device keys and JWTs must not travel over plain HTTP outside a lab network).
@@ -81,3 +83,8 @@ Key entry points: `backend/app/main.py` (app factory, lifespan, WebSocket),
   accent, warm tint palette, validated chart colours, warm dark mode); `VITE_API_URL` for split
   hosting, `CORS_ORIGIN_REGEX`, PORT-aware Dockerfile, `vercel.json`, `render.yaml`,
   docs/DEPLOYMENT.md. Tests: 104 backend / 18 frontend / 4 E2E passing.
+- 2026-10-14: Supabase/Postgres support (URL normalisation, pooler-safe psycopg settings, TLS),
+  fixed `ml_models.data_source` VARCHAR(40) overflow that only Postgres enforces, deterministic
+  model rebuild after ephemeral-disk restarts, `TEST_DATABASE_URL`, CI Postgres job, keep-alive
+  workflow, deployment guide. Verified: 105 tests on SQLite and on PostgreSQL 16; production-mode
+  restart on Postgres keeps data, no reseed, model rebuilt identically.

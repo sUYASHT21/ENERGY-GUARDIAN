@@ -44,6 +44,7 @@ def raise_alert(
     """Create an alert, or refresh the existing open alert with the same dedupe key.
 
     Returns (alert, created)."""
+    title = title[:200]  # column limit (enforced by Postgres; names are user-provided)
     existing = open_alert(db, dedupe_key)
     if existing:
         existing.last_seen_at = now

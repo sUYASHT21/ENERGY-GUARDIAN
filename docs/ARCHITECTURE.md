@@ -26,7 +26,7 @@ flowchart LR
     ALR[Alerts + event log]
     API[REST API + JWT auth]
     WS[WebSocket /ws]
-    DB[(SQLite<br/>SQLAlchemy)]
+    DB[(SQLite or Postgres/Supabase<br/>SQLAlchemy)]
   end
   UI[React dashboard<br/>frontend/]
 
@@ -46,6 +46,13 @@ flowchart LR
   UI -- REST --> API
   WS -- live events --> UI
 ```
+
+## Deployment topology
+
+Local: one machine (Docker Compose or dev servers) with SQLite. Cloud (free): Vercel serves the
+dashboard, Render runs the long-lived FastAPI process, Supabase hosts Postgres — see
+[DEPLOYMENT.md](DEPLOYMENT.md). The same code runs in both; only `DATABASE_URL` and
+`VITE_API_URL` differ.
 
 ## Backend modules
 

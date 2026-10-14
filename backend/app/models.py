@@ -321,7 +321,7 @@ class MLModelRecord(Base):
     version: Mapped[str] = mapped_column(String(40), unique=True)
     algorithm: Mapped[str] = mapped_column(String(40), default="isolation_forest")
     trained_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
-    data_source: Mapped[str] = mapped_column(String(40), default="synthetic")
+    data_source: Mapped[str] = mapped_column(String(200), default="synthetic")
     n_train: Mapped[int] = mapped_column(Integer, default=0)
     n_test: Mapped[int] = mapped_column(Integer, default=0)
     params: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)

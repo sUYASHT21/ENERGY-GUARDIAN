@@ -1,0 +1,17 @@
+name: Keep backend awake
+
+# Backup pinger for Render's free tier (sleeps after ~15 min without traffic). Primary: a free
+# UptimeRobot / cron-job.org monitor every 5 min (GitHub schedules can run late).
+# Enable by adding a repository variable BACKEND_URL (Settings -> Secrets and variables ->
+# Actions -> Variables), e.g. https://energy-guardian-api.onrender.com
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    if: ${{ vars.BACKEND_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS --max-time 90 --retry 2 "${{ vars.BACKEND_URL }}/api/v1/health"

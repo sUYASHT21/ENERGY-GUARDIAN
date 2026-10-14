@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 from app.adapters.telemetry_parsers import OccupancyIn, ReadingIn, TelemetryPayload
 from app.clock import FakeClock
 from app.config import Settings
+from app.database import Database
 from app.main import create_app
 from app.models import Appliance, Device, Room
 from app.security import hash_device_key
@@ -16,9 +18,21 @@ from app.services import telemetry as telemetry_service
 ADMIN_PW = "test-admin-password"
 
 
+# Run the suite against Postgres (e.g. a local container or a Supabase test project) with:
+#   TEST_DATABASE_URL=postgresql://user:pass@host:5432/db pytest
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
+
+
+def fresh_database_url(tmp_path: Path) -> str:
+    if TEST_DATABASE_URL:
+        Database(TEST_DATABASE_URL).drop_all()  # every test starts from an empty schema
+        return TEST_DATABASE_URL
+    return f"sqlite:///{tmp_path / 'test.db'}"
+
+
 def make_settings(tmp_path: Path, **overrides) -> Settings:
     base = dict(
-        app_env="test", database_url=f"sqlite:///{tmp_path / 'test.db'}", model_dir=tmp_path / "models",
+        app_env="test", database_url=fresh_database_url(tmp_path), model_dir=tmp_path / "models",
         secret_key="x" * 40, admin_password=ADMIN_PW, background_tasks_enabled=False, simulation_autostart=False,
         seed_demo_data=False, history_backfill_days=0, ml_autotrain=False, log_level="WARNING",
         command_timeout_seconds=20, device_offline_seconds=30, telemetry_stale_seconds=45,

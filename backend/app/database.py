@@ -13,14 +13,38 @@ class Base(DeclarativeBase):
     pass
 
 
+def normalize_url(url: str) -> str:
+    """Accept the URI formats hosting providers hand out (e.g. Supabase's ``postgresql://`` or the
+    legacy ``postgres://``) and select the psycopg 3 driver."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
+def is_postgres(url: str) -> bool:
+    return normalize_url(url).startswith("postgresql")
+
+
 def make_engine(url: str) -> Engine:
+    url = normalize_url(url)
     connect_args: dict = {}
+    engine_kwargs: dict = {}
     if url.startswith("sqlite"):
         connect_args = {"check_same_thread": False, "timeout": 30}
         path = url.replace("sqlite:///", "", 1)
         if path and path != ":memory:" and not path.startswith("file:"):
             Path(path).parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine(url, connect_args=connect_args, future=True)
+    elif url.startswith("postgresql"):
+        # Supabase's pooler (PgBouncer/Supavisor in transaction mode) does not support prepared
+        # statements; disabling them is harmless on a direct/session connection.
+        connect_args = {"prepare_threshold": None, "connect_timeout": 10}
+        if "supabase" in url and "sslmode=" not in url:
+            connect_args["sslmode"] = "require"
+        # Small pool: free-tier poolers allow a limited number of clients. pre_ping/recycle
+        # transparently replace connections the pooler or network dropped while idle.
+        engine_kwargs = {"pool_size": 5, "max_overflow": 5, "pool_pre_ping": True, "pool_recycle": 300}
+    engine = create_engine(url, connect_args=connect_args, future=True, **engine_kwargs)
 
     if url.startswith("sqlite"):
 
@@ -40,7 +64,7 @@ class Database:
     """Holds the engine + session factory. One instance per application."""
 
     def __init__(self, url: str):
-        self.url = url
+        self.url = normalize_url(url)
         self.engine = make_engine(url)
         self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
 
@@ -50,6 +74,8 @@ class Database:
         Base.metadata.create_all(self.engine)
 
     def drop_all(self) -> None:
+        from . import models  # noqa: F401
+
         Base.metadata.drop_all(self.engine)
 
     @contextmanager

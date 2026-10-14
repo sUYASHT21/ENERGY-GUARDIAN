@@ -8,3 +8,4 @@ numpy==2.5.4
 joblib==1.6.0
 PyJWT==2.15.1
 tzdata==2026.5
+psycopg[binary]==3.3.6

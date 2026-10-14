@@ -23,6 +23,12 @@ if [ ! -f frontend/dist/index.html ] || [ "${1:-}" = "--rebuild" ]; then
 fi
 
 PORT="${PORT:-8000}"
+# If the port is taken (e.g. an earlier run is still open), use the next free one.
+port_busy() { backend/.venv/bin/python -c "import socket,sys; s=socket.socket(); sys.exit(0 if s.connect_ex(('127.0.0.1', int(sys.argv[1]))) == 0 else 1)" "$1"; }
+while port_busy "$PORT"; do
+  echo "Port $PORT is already in use — trying $((PORT + 1))"
+  PORT=$((PORT + 1))
+done
 echo
 echo "==> Smart Energy Guardian: http://localhost:${PORT}   (login: admin / guardian-demo)"
 echo "    API docs: http://localhost:${PORT}/docs   — press Ctrl+C to stop"
